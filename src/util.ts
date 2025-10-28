@@ -31,6 +31,10 @@ export const detectSwapPlatform = ( tx : any ) => {
             programId: "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
         },
         {
+            name: "MeteoraDBC",
+            programId: "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+        },
+        {
             name: "PumpFun",
             programId: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
         },

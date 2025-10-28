@@ -8,6 +8,7 @@ import { parseRaydiumClmmTransaction } from "./raydiumClmm";
 import { parseRaydiumLaunchPadTransaction } from "./raydiumLauchPad";
 import { parseMeteorDlmmTransaction } from "./meteoraDlmm";
 import { parseMeteoraDammV2Transaction } from "./meteoraDammV2";
+import { parseMeteoraDBCTransaction } from "./meteoraDBC";
 
 export async function parseTransaction(transactionData: any) {
   try {
@@ -56,6 +57,9 @@ export async function parseTransaction(transactionData: any) {
 
       case "MeteoraDammV2":
         return await parseMeteoraDammV2Transaction(transactionData);
+        
+      case "MeteoraDBC":
+        return await parseMeteoraDBCTransaction(transactionData);
 
       default:
         console.log(`❌ Unknown platform: ${platform}`);

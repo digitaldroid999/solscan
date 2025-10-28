@@ -8,7 +8,7 @@ import { parseTransaction } from "./parsers/parseFilter";
 const MAX_RETRY_WITH_LAST_SLOT = 30;
 const RETRY_DELAY_MS = 1000;
 // const ADDRESS_TO_STREAM_FROM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
-const ADDRESS_TO_STREAM_FROM = "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG";
+const ADDRESS_TO_STREAM_FROM = "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN";
 
 type StreamResult = {
   lastSlot?: string;
