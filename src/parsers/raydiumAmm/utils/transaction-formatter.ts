@@ -63,7 +63,7 @@ export class TransactionFormatter {
             accounts: any;
           }) => ({
             programIdIndex: programIdIndex,
-            accounts: Array.from(accounts) || [],
+            accounts: [...accounts],
             data: utils.bytes.bs58.encode(Buffer.from(data || "", "base64")),
           }),
         ),
@@ -93,7 +93,7 @@ export class TransactionFormatter {
             data: any;
           }) => ({
             programIdIndex: programIdIndex,
-            accountKeyIndexes: Array.from(accounts) || [],
+            accountKeyIndexes: [...accounts],
             data: Uint8Array.from(Buffer.from(data || "", "base64")),
           }),
         ),
@@ -147,7 +147,7 @@ export class TransactionFormatter {
             index: i.index || 0,
             instructions: i.instructions.map((instruction: any) => ({
               programIdIndex: instruction.programIdIndex,
-              accounts: Array.from(instruction.accounts) || [],
+              accounts: [...instruction.accounts],
               data: utils.bytes.bs58.encode(
                 Buffer.from(instruction.data || "", "base64"),
               ),

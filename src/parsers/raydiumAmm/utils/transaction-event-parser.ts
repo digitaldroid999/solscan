@@ -16,7 +16,7 @@ export function transactionEventParser(txn,parsedTxn){
 
  let userSourceOwner = parsedTxn.instructions
     .flatMap((i) => i.accounts)
-    .find((a) => a?.name === 'userSourceOwner' && a?.isSigner)?.pubkey;
+    .find((a) => a.name === 'userSourceOwner' && a.isSigner)?.pubkey;
 
   if (!userSourceOwner) {
     userSourceOwner = parsedTxn.instructions

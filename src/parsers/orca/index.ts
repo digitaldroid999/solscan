@@ -9,6 +9,7 @@ import {orca_formatter} from "./utils/orca-transaction-formatter"
 import { bnLayoutFormatter } from "./utils/bn-layout-formatter";
 
 const ORCA_PROGRAM_ID = "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc";
+const SOL_MINT = "So11111111111111111111111111111111111111112";
 
 const TXN_FORMATTER = new TransactionFormatter();
 const WHIRLPOOL_PROGRAM_ID = new PublicKey(
@@ -48,25 +49,28 @@ function decodeWhirlpoolTxn(tx: VersionedTransactionResponse) {
 }
 
 export async function parseOrcaTransaction(tx: any) {
-  const txn = TXN_FORMATTER.formTransactionFromJson(
-    tx,
-    Date.now(),
-  );
+    const txn = TXN_FORMATTER.formTransactionFromJson(
+      tx,
+      Date.now(),
+    );
 
-  //console.log("Txn Received: ", txn.transaction.signatures[0]);
+    //console.log("Txn Received: ", txn.transaction.signatures[0]);
 
-  const parsedTxn = decodeWhirlpoolTxn(txn);
+    const parsedTxn = decodeWhirlpoolTxn(txn);
 
-  if (!parsedTxn) return;
-  const formatterOrcaTxn = orca_formatter(parsedTxn, txn);
-  if (!formatterOrcaTxn) return;
+    if (!parsedTxn) return;
+    const formatterOrcaTxn = orca_formatter(parsedTxn,txn);
+    if(!formatterOrcaTxn) return;
 
+    console.log(
+      new Date(),
+      ":",
+      `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
+      JSON.stringify(formatterOrcaTxn.output, null, 2) + "\n",
+      formatterOrcaTxn.transactionEvent
+    ); 
   console.log(
-    new Date(),
-    ":",
-    `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-    JSON.stringify(formatterOrcaTxn.output, null, 2) + "\n",
-    formatterOrcaTxn.transactionEvent
+    "--------------------------------------------------------------------------------------------------"
   );
 }
 

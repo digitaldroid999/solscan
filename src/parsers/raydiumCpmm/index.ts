@@ -6,6 +6,7 @@ import { TransactionFormatter } from "./utils/transaction-formatter";
 import cpmmIDL from "./idls/cpmm_idl.json";
 import { bnLayoutFormatter } from "./utils/bn-layout-formatter";
 
+const SOL_MINT = "So11111111111111111111111111111111111111112";
 const TXN_FORMATTER = new TransactionFormatter();
 const CPMM_PROGRAM_ID = new PublicKey(
   "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
@@ -60,7 +61,17 @@ export async function parseRaydiumCpmmTransaction(tx: any) {
        new Date(),
        ":",
        `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-       JSON.stringify(formattedTxn.rpcTxnWithParsed, null, 2) + "\n",
+      //  JSON.stringify(formattedTxn.rpcTxnWithParsed, null, 2) + "\n",
       formattedTxn.transactionEvent,
     );
+    const result = {
+        platform : "RaydiumCPMM",
+        type : formattedTxn.transactionEvent.type,
+        feePayer : formattedTxn.transactionEvent.user,
+        mintFrom : formattedTxn.transactionEvent.type == 'Buy' ? SOL_MINT : formattedTxn.transactionEvent.mint,
+        mintTo : formattedTxn.transactionEvent.type == 'Buy' ? formattedTxn.transactionEvent.mint : SOL_MINT,
+        in_amount : formattedTxn.transactionEvent.amount,
+        out_amount : formattedTxn.transactionEvent.amount_out,
+    }
+    console.log( result ) ;
 }

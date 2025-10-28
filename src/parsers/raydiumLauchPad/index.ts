@@ -9,6 +9,7 @@ import { bnLayoutFormatter } from "./utils/bn-layout-formatter";
 import raydiumLaunchpadIdl from "./idls/raydium_launchpad.json";
 import { writeFileSync } from "fs";
 import { parsedTransactionOutput } from "./utils/rl-transaction-formatter";
+const SOL_MINT = "So11111111111111111111111111111111111111112";
 
 const TXN_FORMATTER = new TransactionFormatter();
 const RAYDIUM_LAUNCHPAD_PROGRAM_ID = new PublicKey(
@@ -60,10 +61,20 @@ export async function parseRaydiumLaunchPadTransaction(tx: any) {
         new Date(),
         ":",
         `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-        JSON.stringify(rl_formatter.output, null, 2) + "\n",
+        // JSON.stringify(rl_formatter.output, null, 2) + "\n",
         JSON.stringify(rl_formatter.transactionEvent)
     );
     console.log(
         "--------------------------------------------------------------------------------------------------"
     );
+    const result = {
+        platform : "RaydiumLaunchpad",
+        type : rl_formatter.transactionEvent.type,
+        feePayer : rl_formatter.transactionEvent.user,
+        mintFrom : rl_formatter.transactionEvent.type == 'Buy' ? SOL_MINT : rl_formatter.transactionEvent.mint,
+        mintTo : rl_formatter.transactionEvent.type == 'Buy' ? rl_formatter.transactionEvent.mint : SOL_MINT,
+        in_amount : rl_formatter.transactionEvent.amount,
+        out_amount : rl_formatter.transactionEvent.minimumAmount,
+    } ;
+    console.log( result ) ;
 }

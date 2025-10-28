@@ -6,6 +6,7 @@ import { PumpFunDecoder } from "./utils/decode-parser";
 const PUMPFUN_PROGRAM_ID = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
 const TXN_FORMATTER = new TransactionFormatter();
 const pumpFunDecoder = new PumpFunDecoder();
+const SOL_MINT = "So11111111111111111111111111111111111111112";
 
 export async function parsePumpFunTransaction(tx: any) {
   const txn = TXN_FORMATTER.formTransactionFromJson(
@@ -21,6 +22,16 @@ export async function parsePumpFunTransaction(tx: any) {
     `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
     JSON.stringify(parsedPumpfunTxn, null, 2) + "\n"
   );
+  const result = {
+    platform : "PumpFun",
+    type : parsedPumpfunTxn.type,
+    feePayer : parsedPumpfunTxn.user,
+    mintFrom : parsedPumpfunTxn.type == 'sell' ? parsedPumpfunTxn.mint : SOL_MINT,
+    mintTo : parsedPumpfunTxn.type == 'sell' ? SOL_MINT : parsedPumpfunTxn.mint,
+    in_amount : parsedPumpfunTxn.in_amount,
+    out_amount : parsedPumpfunTxn.out_amount,
+  }
+  console.log( result ) ;
   console.log(
     "--------------------------------------------------------------------------------------------------"
   );

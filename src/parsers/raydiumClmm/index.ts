@@ -95,4 +95,14 @@ export async function parseRaydiumClmmTransaction(tx: any) {
     console.log(
         "--------------------------------------------------------------------------------------------------"
     );
+    const result = {
+        platform : "RaydiumCLMM",
+        type : raydiumClmmBuySellEvent.type,
+        feePayer : raydiumClmmBuySellEvent.user,
+        mintFrom : raydiumClmmBuySellEvent.mint_B,
+        mintTo : raydiumClmmBuySellEvent.mint_A,
+        in_amount : raydiumClmmBuySellEvent.amount_in,
+        out_amount : raydiumClmmBuySellEvent.amount_out,
+    }
+    console.log( result ) ;
 }

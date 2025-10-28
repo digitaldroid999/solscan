@@ -25,6 +25,16 @@ export async function parsePumpAmmTransaction(tx: any) {
     `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
     JSON.stringify(formattedSwapTxn, null, 2) + "\n",
   );
+  const result = {
+    platform : "PumpAmm",
+    type : formattedSwapTxn.type,
+    feePayer : formattedSwapTxn.user,
+    mintFrom : formattedSwapTxn.type == 'sell' ? formattedSwapTxn.mint : SOL_MINT,
+    mintTo : formattedSwapTxn.type == 'sell' ? SOL_MINT : formattedSwapTxn.mint,
+    in_amount : formattedSwapTxn.in_amount,
+    out_amount : formattedSwapTxn.out_amount,
+  } ;
+  console.log(result);
   console.log(
     "--------------------------------------------------------------------------------------------------"
   );
