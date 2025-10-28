@@ -8,7 +8,10 @@ import { parseTransaction } from "./parsers/parseFilter";
 const MAX_RETRY_WITH_LAST_SLOT = 30;
 const RETRY_DELAY_MS = 1000;
 // const ADDRESS_TO_STREAM_FROM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
-const ADDRESS_TO_STREAM_FROM = "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo";
+const ADDRESS_TO_STREAM_FROM = [ 
+  "3Ax31Gv8W6TR933oXLfB1iKHhtDg4DoHyLiScs1iJQwj",
+  "1NkY29TLbZoSpbxudtfHL7xaA3pBp5nCRy8VPEUH1j3"
+] ;
 
 type StreamResult = {
   lastSlot?: string;
@@ -25,8 +28,8 @@ async function handleStream(
   let hasRcvdMSg = false;
   let currentSlot = lastSlot;
 
-  return new Promise( async(resolve, reject) => {
-    await stream.on("data", async (data) => {
+  return new Promise( (resolve, reject) => {
+    stream.on("data", (data) => {
       // Update lastSlot from the data
       if (data.transaction?.slot) {
         currentSlot = data.transaction.slot.toString();
@@ -39,7 +42,8 @@ async function handleStream(
         console.log("Got tx:", sig, "slot:", currentSlot);
         
         // Parse transaction based on detected platform
-        await parseTransaction(data.transaction);
+        const result = parseTransaction(data.transaction);
+        console.log("Parsed transaction:",  result);
       }
     });
 
@@ -125,7 +129,7 @@ const req: SubscribeRequest = {
     targetWallet: {
       vote: false,
       failed: false,
-      accountInclude: [ADDRESS_TO_STREAM_FROM],
+      accountInclude: ADDRESS_TO_STREAM_FROM,
       accountExclude: [],
       accountRequired: [],
     },

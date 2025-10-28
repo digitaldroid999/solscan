@@ -46,7 +46,7 @@ function decodeCpmmTxn(tx: VersionedTransactionResponse) {
   }
   
 
-export async function parseRaydiumCpmmTransaction(tx: any) {
+export function parseRaydiumCpmmTransaction(tx: any) {
     const txn = TXN_FORMATTER.formTransactionFromJson(
       tx,
       Date.now(),
@@ -57,13 +57,13 @@ export async function parseRaydiumCpmmTransaction(tx: any) {
     const formattedTxn = parsedTransactionOutput(parsedTxn,txn);
     console.log(formattedTxn)
      if (!formattedTxn) return;
-     console.log(
-       new Date(),
-       ":",
-       `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-      //  JSON.stringify(formattedTxn.rpcTxnWithParsed, null, 2) + "\n",
-      formattedTxn.transactionEvent,
-    );
+    //  console.log(
+    //    new Date(),
+    //    ":",
+    //    `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
+    //   //  JSON.stringify(formattedTxn.rpcTxnWithParsed, null, 2) + "\n",
+    //   formattedTxn.transactionEvent,
+    // );
     const result = {
         platform : "RaydiumCPMM",
         type : formattedTxn.transactionEvent.type,
@@ -73,5 +73,6 @@ export async function parseRaydiumCpmmTransaction(tx: any) {
         in_amount : formattedTxn.transactionEvent.amount,
         out_amount : formattedTxn.transactionEvent.amount_out,
     }
-    console.log( result ) ;
+    // console.log( result ) ;
+    return result ;
 }

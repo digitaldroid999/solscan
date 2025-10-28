@@ -45,7 +45,7 @@ function decodeRaydiumLaunchpad(tx: VersionedTransactionResponse) {
     return result;
 }
 
-export async function parseRaydiumLaunchPadTransaction(tx: any) {
+export function parseRaydiumLaunchPadTransaction(tx: any) {
     const txn = TXN_FORMATTER.formTransactionFromJson(
         tx,
         Date.now()
@@ -57,16 +57,16 @@ export async function parseRaydiumLaunchPadTransaction(tx: any) {
 
     const rl_formatter = parsedTransactionOutput(parsedTxn, txn);
 
-    console.log(
-        new Date(),
-        ":",
-        `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-        // JSON.stringify(rl_formatter.output, null, 2) + "\n",
-        JSON.stringify(rl_formatter.transactionEvent)
-    );
-    console.log(
-        "--------------------------------------------------------------------------------------------------"
-    );
+    // console.log(
+    //     new Date(),
+    //     ":",
+    //     `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
+    //     // JSON.stringify(rl_formatter.output, null, 2) + "\n",
+    //     JSON.stringify(rl_formatter.transactionEvent)
+    // );
+    // console.log(
+    //     "--------------------------------------------------------------------------------------------------"
+    // );
     const result = {
         platform : "RaydiumLaunchpad",
         type : rl_formatter.transactionEvent.type,
@@ -76,5 +76,6 @@ export async function parseRaydiumLaunchPadTransaction(tx: any) {
         in_amount : rl_formatter.transactionEvent.amount,
         out_amount : rl_formatter.transactionEvent.minimumAmount,
     } ;
-    console.log( result ) ;
+    // console.log( result ) ;
+    return result ;
 }

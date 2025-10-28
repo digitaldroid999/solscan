@@ -76,7 +76,7 @@ function hydrateLoadedAddresses(tx: VersionedTransactionResponse): VersionedTran
     return tx;
 }
 
-export async function parseRaydiumClmmTransaction(tx: any) {
+export function parseRaydiumClmmTransaction(tx: any) {
     const txn = TXN_FORMATTER.formTransactionFromJson(
         tx,
         Date.now()
@@ -86,15 +86,15 @@ export async function parseRaydiumClmmTransaction(tx: any) {
     if (!parsedTxn) return;
     const raydiumClmmBuySellEvent = parsedTransactionOutput(parsedTxn, txn);
     if (!raydiumClmmBuySellEvent) return;
-    console.log(
-        new Date(),
-        ":",
-        `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-        JSON.stringify(raydiumClmmBuySellEvent, null, 2) + "\n"
-    );
-    console.log(
-        "--------------------------------------------------------------------------------------------------"
-    );
+    // console.log(
+    //     new Date(),
+    //     ":",
+    //     `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
+    //     JSON.stringify(raydiumClmmBuySellEvent, null, 2) + "\n"
+    // );
+    // console.log(
+    //     "--------------------------------------------------------------------------------------------------"
+    // );
     const result = {
         platform : "RaydiumCLMM",
         type : raydiumClmmBuySellEvent.type,
@@ -104,5 +104,6 @@ export async function parseRaydiumClmmTransaction(tx: any) {
         in_amount : raydiumClmmBuySellEvent.amount_in,
         out_amount : raydiumClmmBuySellEvent.amount_out,
     }
-    console.log( result ) ;
+    // console.log( result ) ;
+    return result ;
 }

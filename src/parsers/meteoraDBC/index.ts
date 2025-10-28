@@ -49,7 +49,7 @@ function decodeMeteoraDBC(tx: VersionedTransactionResponse) {
     }catch(err){
     }
 }
-export async function parseMeteoraDBCTransaction(tx: any) {
+export function parseMeteoraDBCTransaction(tx: any) {
     const txn = TXN_FORMATTER.formTransactionFromJson(
       tx,
       Date.now(),

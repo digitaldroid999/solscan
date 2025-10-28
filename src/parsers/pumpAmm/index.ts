@@ -10,7 +10,7 @@ const SOL_MINT = "So11111111111111111111111111111111111111112";
 const pumpAmmDecoder = new PumpAmmDecoder();
 const TXN_FORMATTER = new TransactionFormatter();
 
-export async function parsePumpAmmTransaction(tx: any) {
+export function parsePumpAmmTransaction(tx: any) {
   const txn = TXN_FORMATTER.formTransactionFromJson(
     tx,
     Date.now()
@@ -19,12 +19,12 @@ export async function parsePumpAmmTransaction(tx: any) {
  const parsedTxn = pumpAmmDecoder.decodePumpAmmTxn(txn);
  const formattedSwapTxn = parseSwapTransactionOutput(parsedTxn,txn);
   if(!formattedSwapTxn) return;
-  console.log(
-    new Date(),
-    ":",
-    `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-    JSON.stringify(formattedSwapTxn, null, 2) + "\n",
-  );
+  // console.log(
+  //   new Date(),
+  //   ":",
+  //   `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
+  //   JSON.stringify(formattedSwapTxn, null, 2) + "\n",
+  // );
   const result = {
     platform : "PumpAmm",
     type : formattedSwapTxn.type,
@@ -34,9 +34,7 @@ export async function parsePumpAmmTransaction(tx: any) {
     in_amount : formattedSwapTxn.in_amount,
     out_amount : formattedSwapTxn.out_amount,
   } ;
-  console.log(result);
-  console.log(
-    "--------------------------------------------------------------------------------------------------"
-  );
+  // console.log(result);
+  return result ;
 }
 

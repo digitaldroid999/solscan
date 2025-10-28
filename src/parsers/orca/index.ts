@@ -48,7 +48,7 @@ function decodeWhirlpoolTxn(tx: VersionedTransactionResponse) {
   return result;
 }
 
-export async function parseOrcaTransaction(tx: any) {
+export function parseOrcaTransaction(tx: any) {
     const txn = TXN_FORMATTER.formTransactionFromJson(
       tx,
       Date.now(),

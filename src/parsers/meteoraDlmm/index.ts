@@ -41,7 +41,7 @@ function decodeMeteoraDLMM(tx: VersionedTransactionResponse) {
     return result;
 }
 
-export async function parseMeteorDlmmTransaction(tx: any) {
+export function parseMeteorDlmmTransaction(tx: any) {
     const txn = TXN_FORMATTER.formTransactionFromJson(
         tx,
         Date.now(),
@@ -60,4 +60,7 @@ export async function parseMeteorDlmmTransaction(tx: any) {
     console.log(
         "--------------------------------------------------------------------------------------------------"
     );
+    const result = {
+
+    }
 }

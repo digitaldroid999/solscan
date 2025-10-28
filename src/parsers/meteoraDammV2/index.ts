@@ -49,7 +49,7 @@ function decodeMeteoradammV2(tx: VersionedTransactionResponse) {
     } catch (err) {
     }
 }
-export async function parseMeteoraDammV2Transaction(tx: any) {
+export function parseMeteoraDammV2Transaction(tx: any) {
     const txn = TXN_FORMATTER.formTransactionFromJson(
         tx,
         Date.now(),

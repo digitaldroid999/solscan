@@ -35,7 +35,7 @@ function decodeRaydiumTxn(tx: VersionedTransactionResponse) {
 }
 
 
-export async function parseRaydiumAmmTransaction(tx: any) {
+export function parseRaydiumAmmTransaction(tx: any) {
   const txn = TXN_FORMATTER.formTransactionFromJson(
     tx,
     Date.now(),
@@ -46,13 +46,13 @@ export async function parseRaydiumAmmTransaction(tx: any) {
 
   const eventParser = transactionEventParser(txn, parsedTxn)
 
-  console.log(
-    new Date(),
-    ":",
-    `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-    // JSON.stringify(parsedTxn, null, 2) + "\n",
-    eventParser,
-  );
+  // console.log(
+  //   new Date(),
+  //   ":",
+  //   `New transaction https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
+  //   // JSON.stringify(parsedTxn, null, 2) + "\n",
+  //   eventParser,
+  // );
   const result = {
     platform : "RaydiumAmm",
     type : eventParser["Type: "] ,
@@ -62,4 +62,5 @@ export async function parseRaydiumAmmTransaction(tx: any) {
     in_amount : eventParser["Amount in: "],
     out_amount : eventParser["Amount out: "],
   }
+  return result ;
 }

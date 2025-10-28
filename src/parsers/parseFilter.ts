@@ -10,7 +10,7 @@ import { parseMeteorDlmmTransaction } from "./meteoraDlmm";
 import { parseMeteoraDammV2Transaction } from "./meteoraDammV2";
 import { parseMeteoraDBCTransaction } from "./meteoraDBC";
 
-export async function parseTransaction(transactionData: any) {
+export function parseTransaction(transactionData: any) {
   try {
     // Get the transaction from the data
     const tx = transactionData?.transaction?.transaction;
@@ -32,34 +32,34 @@ export async function parseTransaction(transactionData: any) {
     // Route to the appropriate parser based on platform
     switch (platform) {
       case "PumpFun Amm":
-        return await parsePumpAmmTransaction(transactionData);
+        return parsePumpAmmTransaction(transactionData);
 
       case "PumpFun":
-        return await parsePumpFunTransaction(transactionData);
+        return parsePumpFunTransaction(transactionData);
 
       case "RaydiumAmm":
-        return await parseRaydiumAmmTransaction(transactionData);
+        return parseRaydiumAmmTransaction(transactionData);
 
       case "RaydiumCpmm":
-        return await parseRaydiumCpmmTransaction(transactionData);
+        return parseRaydiumCpmmTransaction(transactionData);
 
       case "RaydiumClmm":
-        return await parseRaydiumClmmTransaction(transactionData);
+        return parseRaydiumClmmTransaction(transactionData);
 
       case "RaydiumLaunchPad":
-        return await parseRaydiumLaunchPadTransaction(transactionData);
+        return parseRaydiumLaunchPadTransaction(transactionData);
 
       case "Orca":
-        return await parseOrcaTransaction(transactionData);
+        return parseOrcaTransaction(transactionData);
         
       case "MeteoraDLMM":
-        return await parseMeteorDlmmTransaction(transactionData);
+        return parseMeteorDlmmTransaction(transactionData);
 
       case "MeteoraDammV2":
-        return await parseMeteoraDammV2Transaction(transactionData);
+        return parseMeteoraDammV2Transaction(transactionData);
         
       case "MeteoraDBC":
-        return await parseMeteoraDBCTransaction(transactionData);
+        return parseMeteoraDBCTransaction(transactionData);
 
       default:
         console.log(`❌ Unknown platform: ${platform}`);
