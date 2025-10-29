@@ -1,93 +1,242 @@
-# Solscan
+# Solscan - Solana Transaction Tracker
 
-A TypeScript + Node.js application for Solana blockchain operations and crypto analysis.
+A real-time Solana transaction tracker with a web interface for monitoring DEX transactions across multiple platforms.
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
+### 1. Install Dependencies
 
-- Node.js (v18 or higher)
-- npm or yarn
-
-### Installation
-
-1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Create environment file:
-```bash
-cp .env.example .env
+### 2. Configure Environment
+
+Create a `.env` file:
+
+```env
+# Yellowstone gRPC
+GRPC_URL=your_grpc_url_here
+X_TOKEN=your_token_here
+
+# PostgreSQL
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=solscan
+DB_USER=postgres
+DB_PASSWORD=your_password_here
 ```
 
-3. Edit `.env` and configure your settings (optional - defaults to public Solana RPC)
+### 3. Setup Database
 
-### Development
+**Create PostgreSQL database:**
 
-Run in development mode with auto-reload:
 ```bash
-npm run dev
+psql -U postgres
+CREATE DATABASE solscan;
 ```
 
-### Build
+The application automatically creates tables on first run.
 
-Compile TypeScript to JavaScript:
-```bash
-npm run build
-```
+### 4. Start the Application
 
-### Production
-
-Run the compiled application:
 ```bash
 npm start
 ```
+
+Open your browser: **http://localhost:3000**
+
+## 📖 How to Use
+
+1. **Enter Addresses** - Add up to 5 Solana addresses you want to track
+2. **Click "Start Tracking"** - Begin monitoring transactions
+3. **View Results** - Real-time transactions appear in the table
+4. **Filter by Date** - Use date filters to view specific time periods
+5. **Click "Stop Tracking"** - Pause monitoring when done
+
+## ✨ Features
+
+- ✅ **Web Interface** - Control everything from your browser
+- ✅ **Real-time Tracking** - Live transaction monitoring
+- ✅ **Date Filtering** - View transactions by date range
+- ✅ **Multiple DEX Support** - Raydium, Orca, Meteora, Pump.fun, and more
+- ✅ **PostgreSQL Storage** - All transactions saved to database
+- ✅ **Auto-refresh** - Updates every 3 seconds
+- ✅ **Pagination** - Browse through transaction history
+- ✅ **Start/Stop Controls** - Full control over tracking
+
+## 🎯 Supported Platforms
+
+- **Raydium** (AMM, CLMM, CPMM, LaunchPad)
+- **Orca** (Whirlpool)
+- **Meteora** (DLMM, DBC, DAMM V2)
+- **Pump.fun**
+- **Pump AMM**
 
 ## 📁 Project Structure
 
 ```
 solscan/
 ├── src/
-│   └── index.ts          # Main application entry point
-├── dist/                 # Compiled JavaScript (generated)
-├── .env                  # Environment variables (create from .env.example)
-├── .env.example          # Environment variables template
-├── package.json          # Project dependencies and scripts
-├── tsconfig.json         # TypeScript configuration
-└── README.md            # This file
+│   ├── server.ts           # Web server
+│   ├── index.ts            # CLI version (optional)
+│   ├── tracker/            # Transaction tracking service
+│   ├── database/           # PostgreSQL integration
+│   └── parsers/            # DEX-specific parsers
+├── public/
+│   └── index.html          # Web interface
+└── .env                    # Configuration
 ```
 
-## 🛠️ Available Scripts
+## 🔧 Commands
 
-- `npm run dev` - Run in development mode with ts-node
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm start` - Run compiled application
-- `npm run watch` - Watch mode for development
-- `npm run clean` - Remove build artifacts
+| Command | Purpose |
+|---------|---------|
+| `npm start` | Start web interface (recommended) |
+| `npm run server` | Same as npm start |
+| `npm run start-cli` | Command-line version |
+| `npm run build` | Build TypeScript |
+
+## 💡 Usage Tips
+
+### Testing with Popular DEX Addresses
+
+```
+Raydium V4:  675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8
+Orca:        whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc
+Meteora:     LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo
+Pump.fun:    6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P
+```
+
+### Date Filtering
+
+- **Specific Date Range** - Select both From and To dates
+- **From Date Onwards** - Select only From date
+- **Up to Date** - Select only To date
+- **Clear Filter** - Click "Clear Filter" button
+
+### Database Queries
+
+```sql
+-- View all transactions
+SELECT * FROM transactions ORDER BY created_at DESC LIMIT 10;
+
+-- Filter by platform
+SELECT * FROM transactions WHERE platform = 'PumpFun';
+
+-- Filter by wallet
+SELECT * FROM transactions WHERE fee_payer = 'YOUR_WALLET';
+
+-- Count by platform
+SELECT platform, COUNT(*) FROM transactions GROUP BY platform;
+```
+
+## 🔍 API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/status` | GET | Get tracker status |
+| `/api/addresses` | POST | Set addresses to track |
+| `/api/start` | POST | Start tracking |
+| `/api/stop` | POST | Stop tracking |
+| `/api/transactions` | GET | Get transactions (with date filters) |
+
+## 🐛 Troubleshooting
+
+### Server Won't Start
+
+- Check `.env` file exists with valid credentials
+- Ensure PostgreSQL is running
+- Verify port 3000 is available
+
+### No Transactions Appearing
+
+- Verify addresses are correct Solana addresses
+- Check addresses are active on the network
+- Look for errors in server console
+
+### Database Connection Failed
+
+```bash
+# Start PostgreSQL
+# Windows
+Get-Service postgresql*
+
+# Linux/Mac
+sudo systemctl start postgresql
+```
+
+### Wrong Command
+
+**Use `npm start` for web interface** (not `npm run start-cli`)
+
+## 🗄️ Database Schema
+
+**Table: transactions**
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | SERIAL | Auto-increment ID |
+| transaction_id | VARCHAR(100) | Solana signature (unique) |
+| platform | VARCHAR(50) | DEX platform name |
+| type | VARCHAR(20) | buy/sell |
+| mint_from | VARCHAR(100) | Source token mint |
+| mint_to | VARCHAR(100) | Destination token mint |
+| in_amount | NUMERIC(40, 0) | Input amount |
+| out_amount | NUMERIC(40, 0) | Output amount |
+| fee_payer | VARCHAR(100) | Wallet address |
+| created_at | TIMESTAMP | Record timestamp |
+
+## 📊 How It Works
+
+```
+Browser → Express Server → Tracker Service → Yellowstone gRPC
+   ↓                              ↓
+Database ←─────────────────────────┘
+```
+
+1. Enter addresses in web interface
+2. Tracker subscribes to Yellowstone gRPC
+3. Real-time transactions are parsed
+4. Data saved to PostgreSQL
+5. Web interface displays results
+
+## 🔐 Security Notes
+
+**For Production:**
+- Add authentication
+- Enable HTTPS
+- Restrict CORS origins
+- Use environment variables for secrets
+- Implement rate limiting
 
 ## 📦 Dependencies
 
-- **@solana/web3.js** - Solana JavaScript API
-- **axios** - HTTP client for API requests
-- **dotenv** - Environment variable management
-- **TypeScript** - Type-safe JavaScript
+- `@triton-one/yellowstone-grpc` - Solana gRPC streaming
+- `@solana/web3.js` - Solana JavaScript API
+- `@project-serum/anchor` - Anchor framework
+- `express` - Web server
+- `pg` - PostgreSQL client
+- `dotenv` - Environment variables
 
-## 🔧 Configuration
+## 🎓 Understanding the System
 
-Edit `tsconfig.json` to customize TypeScript compiler options.
+### Web Interface (Recommended)
 
-Edit `.env` to configure:
-- Solana RPC endpoints
-- API keys
-- Other application settings
+1. Run `npm start`
+2. Server waits for your input
+3. Enter addresses in browser
+4. Click "Start" to begin tracking
+5. Click "Stop" to pause
+6. Full control from browser
 
-## 📝 Next Steps
+### CLI Version (Alternative)
 
-1. Install dependencies: `npm install`
-2. Start coding in `src/index.ts`
-3. Add more modules in the `src/` directory
-4. Run with `npm run dev` to test your changes
+1. Run `npm run start-cli`
+2. Immediately starts tracking
+3. Uses hardcoded addresses in `src/index.ts`
+4. No web interface
+5. Stop with Ctrl+C
 
 ## 🤝 Contributing
 
@@ -97,3 +246,6 @@ Feel free to fork, modify, and submit pull requests!
 
 MIT
 
+---
+
+**Ready to track? Run `npm start` and open http://localhost:3000** 🚀

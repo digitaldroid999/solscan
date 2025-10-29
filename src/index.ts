@@ -1,9 +1,11 @@
 require("dotenv").config();
 import Client, { CommitmentLevel } from "@triton-one/yellowstone-grpc";
-import { SubscribeRequest } from "@triton-one/yellowstone-grpc/dist/types/grpc/geyser";
+import { SubscribeRequest, SubscribeUpdateTransaction } from "@triton-one/yellowstone-grpc/dist/types/grpc/geyser";
 import * as bs58 from "bs58";
 
 import { parseTransaction } from "./parsers/parseFilter";
+import { dbService } from "./database";
+const fs = require( 'fs' ) ;
 
 const MAX_RETRY_WITH_LAST_SLOT = 30;
 const RETRY_DELAY_MS = 1000;
@@ -44,6 +46,21 @@ async function handleStream(
         // Parse transaction based on detected platform
         const result = parseTransaction(data.transaction);
         console.log("Parsed transaction:",  result);
+        
+        // Save to database asynchronously (non-blocking)
+        if (result) {
+          dbService.saveTransaction(sig, {
+            platform: result.platform,
+            type: result.type,
+            mint_from: result.mintFrom,
+            mint_to: result.mintTo,
+            in_amount: result.in_amount,
+            out_amount: result.out_amount,
+            feePayer: result.feePayer,
+          });
+
+          fs.appendFileSync( 'transactions.txt', `${result}\n` );
+        }
       }
     });
 
@@ -65,7 +82,6 @@ async function handleStream(
 async function subscribeCommand(client: Client, args: SubscribeRequest) {
   let lastSlot: string | undefined;
   let retryCount = 0;
-
   while (true) {
     try {
       if (args.fromSlot) {
@@ -142,4 +158,32 @@ const req: SubscribeRequest = {
   commitment: CommitmentLevel.CONFIRMED,
 };
 
-subscribeCommand(client, req);
+// Initialize database and start streaming
+async function main() {
+  try {
+    // Initialize database connection and create tables
+    await dbService.initialize();
+    
+    // Start transaction streaming
+    console.log("🚀 Starting streaming...");
+    await subscribeCommand(client, req);
+  } catch (error) {
+    console.error("Failed to start application:", error);
+    process.exit(1);
+  }
+}
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n⏸️  Shutting down gracefully...');
+  await dbService.close();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n⏸️  Shutting down gracefully...');
+  await dbService.close();
+  process.exit(0);
+});
+
+main();

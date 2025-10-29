@@ -56,16 +56,11 @@ export const detectSwapPlatform = ( tx : any ) => {
     
     // Use both instructions and compiledInstructions
     const allInstructions = [...instructions, ...compiledInstructions];
-    
-    allInstructions.forEach((ix: any, index) => {
-        const programId = accountKeysBase58[ix.programIdIndex];
-    });
 
     for (const platform of swapPlatforms) {
-        // Check if any instruction uses this platform's program ID
-        const hasMatch = allInstructions.some((ix: any) => {
-            const programId = accountKeysBase58[ix.programIdIndex];
-            return programId === platform.programId;
+        // Check if the platform's program ID appears in any account key
+        const hasMatch = accountKeysBase58.some((accountKey: string) => {
+            return accountKey === platform.programId;
         });
         
         if (hasMatch) {
