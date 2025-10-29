@@ -306,15 +306,38 @@
         .truncate {
             max-width: 150px;
             overflow: hidden;
-            text-overflow: ellipsis;
             white-space: nowrap;
-            cursor: pointer;
+            position: relative;
         }
 
-        .truncate:hover {
-            overflow: visible;
-            white-space: normal;
-            word-break: break-all;
+        .truncate a {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .truncate a:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+
+        .truncate-inner {
+            display: inline-block;
+            animation: none;
+        }
+
+        .truncate:hover .truncate-inner {
+            animation: scroll-text 10s linear infinite;
+        }
+
+        @keyframes scroll-text {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-100% + 150px));
+            }
         }
 
         .platform-badge {
@@ -843,14 +866,30 @@
 
             tbody.innerHTML = transactions.map(tx => `
                 <tr>
-                    <td class="mono truncate" title="${tx.transaction_id}">${tx.transaction_id}</td>
+                    <td class="mono truncate" title="${tx.transaction_id}">
+                        <a href="https://solscan.io/tx/${tx.transaction_id}" target="_blank" rel="noopener noreferrer">
+                            <span class="truncate-inner">${tx.transaction_id}</span>
+                        </a>
+                    </td>
                     <td><span class="platform-badge ${getPlatformClass(tx.platform)}">${tx.platform}</span></td>
                     <td>${tx.type}</td>
-                    <td class="mono truncate" title="${tx.mint_from}">${tx.mint_from}</td>
-                    <td class="mono truncate" title="${tx.mint_to}">${tx.mint_to}</td>
+                    <td class="mono truncate" title="${tx.mint_from}">
+                        <a href="https://solscan.io/token/${tx.mint_from}" target="_blank" rel="noopener noreferrer">
+                            <span class="truncate-inner">${tx.mint_from}</span>
+                        </a>
+                    </td>
+                    <td class="mono truncate" title="${tx.mint_to}">
+                        <a href="https://solscan.io/token/${tx.mint_to}" target="_blank" rel="noopener noreferrer">
+                            <span class="truncate-inner">${tx.mint_to}</span>
+                        </a>
+                    </td>
                     <td>${formatNumber(tx.in_amount)}</td>
                     <td>${formatNumber(tx.out_amount)}</td>
-                    <td class="mono truncate" title="${tx.feePayer}">${tx.feePayer}</td>
+                    <td class="mono truncate" title="${tx.feePayer}">
+                        <a href="https://solscan.io/account/${tx.feePayer}" target="_blank" rel="noopener noreferrer">
+                            <span class="truncate-inner">${tx.feePayer}</span>
+                        </a>
+                    </td>
                     <td>${formatTime(tx.created_at)}</td>
                 </tr>
             `).join('');
