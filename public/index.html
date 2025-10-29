@@ -656,10 +656,11 @@
         function formatNumber(num) {
             if (!num || num === '0') return '0';
             const number = parseFloat(num);
-            if (number > 1e9) return (number / 1e9).toFixed(2) + 'B';
-            if (number > 1e6) return (number / 1e6).toFixed(2) + 'M';
-            if (number > 1e3) return (number / 1e3).toFixed(2) + 'K';
-            return number.toFixed(2);
+            // Display full number with up to 6 decimal places, removing trailing zeros
+            return number.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 6
+            });
         }
 
         // Format timestamp
