@@ -13,9 +13,9 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a5bbd 0%, #5a3678 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
 
         .container {
@@ -26,35 +26,35 @@
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .header p {
-            font-size: 1.1rem;
+            font-size: 0.85rem;
             opacity: 0.9;
         }
 
         .card {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 30px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 10px;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 15px;
             font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
+            font-size: 0.75rem;
+            margin-bottom: 10px;
         }
 
         .status-badge.running {
@@ -68,28 +68,28 @@
         }
 
         .section-title {
-            font-size: 1.3rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .section-title::before {
             content: '';
-            width: 4px;
-            height: 24px;
+            width: 3px;
+            height: 18px;
             background: #667eea;
             border-radius: 2px;
         }
 
         .input-group {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .input-wrapper {
@@ -98,18 +98,18 @@
         }
 
         .input-wrapper label {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             font-weight: 500;
             color: #4b5563;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         input[type="text"],
         input[type="date"] {
-            padding: 12px 16px;
+            padding: 8px 12px;
             border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
             transition: all 0.3s;
             font-family: 'Courier New', monospace;
         }
@@ -135,21 +135,21 @@
 
         .button-group {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         button {
-            padding: 14px 28px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         button:disabled {
@@ -196,64 +196,13 @@
         .btn-refresh {
             background: #667eea;
             color: white;
-            padding: 14px 24px;
+            padding: 8px 14px;
         }
 
         .btn-refresh:hover {
             background: #5568d3;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-toggle {
-            background: #f3f4f6;
-            color: #374151;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-
-        .btn-toggle:hover {
-            background: #e5e7eb;
-            transform: translateY(-1px);
-        }
-
-        /* Date Filter Card Styles */
-        #dateFilterCard {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: top center;
-        }
-
-        #dateFilterCard.collapsed {
-            transform: scale(0.95);
-            opacity: 0.85;
-        }
-
-        #filterContent {
-            max-height: 500px;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                        opacity 0.3s ease-out,
-                        padding 0.3s ease-out;
-            opacity: 1;
-            padding-top: 0;
-        }
-
-        #filterContent.collapsed {
-            max-height: 0;
-            opacity: 0;
-            padding-top: 0;
-        }
-
-        .date-filter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            transition: margin-bottom 0.3s ease-out;
-        }
-
-        #dateFilterCard.collapsed .date-filter-header {
-            margin-bottom: 0;
         }
 
         .table-container {
@@ -273,20 +222,20 @@
         }
 
         th {
-            padding: 16px;
+            padding: 10px;
             text-align: left;
             font-weight: 600;
             color: #374151;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: 2px solid #e5e7eb;
         }
 
         td {
-            padding: 16px;
+            padding: 10px;
             border-bottom: 1px solid #f3f4f6;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             color: #1f2937;
         }
 
@@ -300,11 +249,11 @@
 
         .mono {
             font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
+            font-size: 0.7rem;
         }
 
         .truncate {
-            max-width: 150px;
+            max-width: 120px;
             overflow: hidden;
             white-space: nowrap;
             position: relative;
@@ -336,15 +285,15 @@
                 transform: translateX(0);
             }
             100% {
-                transform: translateX(calc(-100% + 150px));
+                transform: translateX(calc(-100% + 120px));
             }
         }
 
         .platform-badge {
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
             font-weight: 600;
             text-transform: uppercase;
         }
@@ -358,34 +307,35 @@
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 30px 15px;
             color: #6b7280;
         }
 
         .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 10px;
             opacity: 0.5;
         }
 
         .empty-state h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            margin-bottom: 5px;
         }
 
         .empty-state p {
-            font-size: 1rem;
+            font-size: 0.8rem;
         }
 
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 20px;
-            border-radius: 8px;
+            top: 15px;
+            right: 15px;
+            padding: 10px 15px;
+            border-radius: 6px;
             color: white;
             font-weight: 500;
+            font-size: 0.8rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             z-index: 1000;
             animation: slideIn 0.3s ease;
@@ -418,49 +368,399 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         .pagination button {
-            padding: 10px 20px;
+            padding: 6px 12px;
             background: #667eea;
             color: white;
+            font-size: 0.75rem;
         }
 
         .pagination span {
             color: #4b5563;
             font-weight: 500;
+            font-size: 0.75rem;
         }
 
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(26, 32, 44, 0.95);
+            backdrop-filter: blur(10px);
             color: white;
-            padding: 20px;
+            padding: 10px 15px;
             border-radius: 8px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 120px;
         }
 
         .stat-card h3 {
-            font-size: 2rem;
-            margin-bottom: 5px;
+            font-size: 1.5rem;
+            margin-bottom: 2px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .stat-card p {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 80vh;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 15px 24px;
+            border-bottom: 2px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            background: #f3f4f6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #6b7280;
+            transition: all 0.2s;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #ef4444;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-modal-analyze {
+            width: 100%;
+            padding: 12px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 6px;
             font-size: 0.9rem;
-            opacity: 0.9;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-modal-analyze:hover:not(:disabled) {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .wallet-info {
+            margin-top: 24px;
+        }
+
+        .wallet-info-section {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .wallet-info-section h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .wallet-address {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #667eea;
+            word-break: break-all;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .sol-balance {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981;
+            margin: 10px 0;
+        }
+
+        .token-list {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .token-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .token-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .token-table thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            color: white;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border: none;
+        }
+
+        .token-table tbody tr {
+            background: white;
+            transition: all 0.2s;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .token-table tbody tr:hover {
+            background: linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%);
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .token-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .token-table tbody td {
+            padding: 14px 16px;
+            font-size: 0.8rem;
+            color: #1f2937;
+        }
+
+        .token-table .token-name-cell {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .token-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+            background: white;
+        }
+
+        .token-name-text {
+            flex: 1;
+        }
+
+        .token-table .token-symbol-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 4px 8px !important;
+            border-radius: 4px;
+        }
+
+        .token-table .token-mint-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            max-width: 250px;
+            word-break: break-all;
+        }
+
+        .token-table .token-mint-cell a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .token-table .token-mint-cell a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .token-table .token-amount-cell {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #10b981;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .token-table .token-index-cell {
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+            font-size: 0.9rem;
+            width: 50px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-tokens {
+            text-align: center;
+            padding: 20px;
+            color: #9ca3af;
+            font-size: 0.85rem;
         }
 
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 1.8rem;
+                font-size: 1.2rem;
             }
 
             .input-group {
@@ -472,11 +772,26 @@
             }
 
             table {
-                font-size: 0.8rem;
+                font-size: 0.65rem;
             }
 
             th, td {
-                padding: 10px;
+                padding: 6px;
+            }
+
+            .stats-grid {
+                position: static;
+                flex-direction: column;
+                margin-bottom: 10px;
+            }
+
+            .stat-card {
+                min-width: auto;
+            }
+
+            .modal {
+                width: 95%;
+                padding: 20px;
             }
         }
     </style>
@@ -527,38 +842,6 @@
                 <button id="analyzeBtn" class="btn-analyze">
                     <span>📊</span> Analyze
                 </button>
-            </div>
-        </div>
-
-        <!-- Date Filter -->
-        <div class="card collapsed" id="dateFilterCard">
-            <div class="date-filter-header">
-                <div class="section-title" style="margin: 0;">📅 Date Filter</div>
-                <button id="toggleFilterBtn" class="btn-toggle">
-                    <span id="toggleFilterIcon">▶️</span> <span id="toggleFilterText">Show</span>
-                </button>
-            </div>
-            
-            <div id="filterContent" class="collapsed">
-                <div class="input-group">
-                    <div class="input-wrapper">
-                        <label for="fromDate">From Date</label>
-                        <input type="date" id="fromDate" placeholder="From date...">
-                    </div>
-                    <div class="input-wrapper">
-                        <label for="toDate">To Date</label>
-                        <input type="date" id="toDate" placeholder="To date...">
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button id="applyFilterBtn" class="btn-start">
-                        <span>🔍</span> Apply Filter
-                    </button>
-                    <button id="clearFilterBtn" class="btn-stop">
-                        <span>✖️</span> Clear Filter
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -618,6 +901,28 @@
                 <button id="prevBtn" onclick="previousPage()" disabled>← Previous</button>
                 <span id="pageInfo">Page 1</span>
                 <button id="nextBtn" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyze Modal -->
+    <div id="analyzeModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📊 Wallet Analysis</h2>
+                <button class="modal-close" onclick="closeAnalyzeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="walletSelect">Select Wallet Address</label>
+                    <select id="walletSelect">
+                        <option value="">-- Select a wallet --</option>
+                    </select>
+                </div>
+                <button id="modalAnalyzeBtn" class="btn-modal-analyze" onclick="analyzeSelectedWallet()">
+                    <span>📊</span> Analyze Wallet
+                </button>
+                <div id="walletInfoContainer"></div>
             </div>
         </div>
     </div>
@@ -807,15 +1112,7 @@
         async function fetchTransactions() {
             try {
                 const offset = (currentPage - 1) * pageSize;
-                
-                // Get date filter values
-                const fromDate = document.getElementById('fromDate').value;
-                const toDate = document.getElementById('toDate').value;
-                
-                // Build query string with date filters
-                let queryString = `limit=${pageSize}&offset=${offset}`;
-                if (fromDate) queryString += `&fromDate=${fromDate}`;
-                if (toDate) queryString += `&toDate=${toDate}`;
+                const queryString = `limit=${pageSize}&offset=${offset}`;
                 
                 const response = await fetch(`/api/transactions?${queryString}`);
                 const data = await response.json();
@@ -825,19 +1122,6 @@
 
                 renderTransactions(data.transactions);
                 updatePagination();
-                
-                // Show filter status
-                if (fromDate || toDate) {
-                    let filterMsg = 'Showing transactions';
-                    if (fromDate && toDate) {
-                        filterMsg += ` from ${fromDate} to ${toDate}`;
-                    } else if (fromDate) {
-                        filterMsg += ` from ${fromDate} onwards`;
-                    } else if (toDate) {
-                        filterMsg += ` up to ${toDate}`;
-                    }
-                    console.log(filterMsg);
-                }
             } catch (error) {
                 console.error('Failed to fetch transactions:', error);
                 showNotification('Failed to fetch transactions', 'error');
@@ -944,47 +1228,168 @@
         document.getElementById('stopBtn').addEventListener('click', stopTracking);
         document.getElementById('refreshBtn').addEventListener('click', fetchTransactions);
         
-        // Analyze button
-        document.getElementById('analyzeBtn').addEventListener('click', () => {
-            showNotification('Analyze feature - Coming soon!', 'info');
-            // TODO: Implement analyze functionality
-        });
-        
-        // Toggle filter visibility
-        document.getElementById('toggleFilterBtn').addEventListener('click', () => {
-            const filterCard = document.getElementById('dateFilterCard');
-            const filterContent = document.getElementById('filterContent');
-            const toggleIcon = document.getElementById('toggleFilterIcon');
-            const toggleText = document.getElementById('toggleFilterText');
+        // Analyze Modal Functions
+        function openAnalyzeModal() {
+            const modal = document.getElementById('analyzeModal');
+            const select = document.getElementById('walletSelect');
             
-            if (filterContent.classList.contains('collapsed')) {
-                // Expand
-                filterCard.classList.remove('collapsed');
-                filterContent.classList.remove('collapsed');
-                toggleIcon.textContent = '🔽';
-                toggleText.textContent = 'Hide';
-            } else {
-                // Collapse
-                filterCard.classList.add('collapsed');
-                filterContent.classList.add('collapsed');
-                toggleIcon.textContent = '▶️';
-                toggleText.textContent = 'Show';
+            // Clear previous wallet info
+            document.getElementById('walletInfoContainer').innerHTML = '';
+            
+            // Get current addresses and populate select box
+            const addresses = getAddresses();
+            
+            if (addresses.length === 0) {
+                showNotification('Please enter at least one address first', 'error');
+                return;
             }
-        });
+            
+            // Populate select options
+            select.innerHTML = '<option value="">-- Select a wallet --</option>';
+            addresses.forEach((addr, index) => {
+                const option = document.createElement('option');
+                option.value = addr;
+                option.textContent = `Address ${index + 1}: ${addr.substring(0, 8)}...${addr.substring(addr.length - 6)}`;
+                select.appendChild(option);
+            });
+            
+            modal.classList.add('active');
+        }
+
+        function closeAnalyzeModal() {
+            const modal = document.getElementById('analyzeModal');
+            modal.classList.remove('active');
+        }
+
+        async function analyzeSelectedWallet() {
+            const select = document.getElementById('walletSelect');
+            const walletAddress = select.value;
+            
+            if (!walletAddress) {
+                showNotification('Please select a wallet address', 'error');
+                return;
+            }
+            
+            const container = document.getElementById('walletInfoContainer');
+            const button = document.getElementById('modalAnalyzeBtn');
+            
+            // Show loading
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Analyzing wallet...</p>
+                </div>
+            `;
+            button.disabled = true;
+            
+            try {
+                const response = await fetch(`/api/analyze/${walletAddress}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to analyze wallet');
+                }
+                
+                const data = await response.json();
+                displayWalletInfo(data);
+                showNotification('Wallet analyzed successfully!', 'success');
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="wallet-info">
+                        <div class="wallet-info-section">
+                            <p style="color: #ef4444; text-align: center;">
+                                ❌ Failed to analyze wallet. Please try again.
+                            </p>
+                        </div>
+                    </div>
+                `;
+                showNotification('Failed to analyze wallet', 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function displayWalletInfo(data) {
+            const container = document.getElementById('walletInfoContainer');
+            
+            let tokensHTML = '';
+            if (data.tokens && data.tokens.length > 0) {
+                const tokenRows = data.tokens.map((token, index) => {
+                    const tokenImage = token.image 
+                        ? `<img src="${token.image}" alt="${token.symbol}" class="token-image" onerror="this.style.display='none'">`
+                        : `<div class="token-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.7rem;">${(token.symbol || '?').substring(0, 2)}</div>`;
+                    
+                    return `
+                        <tr>
+                            <td class="token-index-cell">${index + 1}</td>
+                            <td class="token-name-cell">
+                                ${tokenImage}
+                                <span class="token-name-text">${token.name || 'Unknown Token'}</span>
+                            </td>
+                            <td class="token-symbol-cell">${token.symbol || '???'}</td>
+                            <td class="token-mint-cell">
+                                <a href="https://solscan.io/token/${token.mint}" target="_blank" rel="noopener noreferrer">
+                                    ${token.mint}
+                                </a>
+                            </td>
+                            <td class="token-amount-cell">${formatNumber(token.amount)}</td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                tokensHTML = `
+                    <table class="token-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Token Name</th>
+                                <th>Symbol</th>
+                                <th>Mint Address</th>
+                                <th style="text-align: right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tokenRows}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                tokensHTML = '<div class="empty-tokens">No tokens found in this wallet</div>';
+            }
+            
+            container.innerHTML = `
+                <div class="wallet-info">
+                    <div class="wallet-info-section">
+                        <h3>💼 Wallet Address</h3>
+                        <div class="wallet-address">
+                            <a href="https://solscan.io/account/${data.wallet}" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none;">
+                                ${data.wallet}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-info-section" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+                        <h3>💰 SOL Balance</h3>
+                        <div class="sol-balance" style="font-size: 2rem;">${formatNumber(data.solBalance)} SOL</div>
+                    </div>
+                    
+                    <div class="wallet-info-section">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 15px;">🪙 Token Holdings <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; margin-left: 8px;">${data.tokens ? data.tokens.length : 0}</span></h3>
+                        <div class="token-list">
+                            ${tokensHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Analyze button - Open modal
+        document.getElementById('analyzeBtn').addEventListener('click', openAnalyzeModal);
         
-        // Date filter event listeners
-        document.getElementById('applyFilterBtn').addEventListener('click', () => {
-            currentPage = 1; // Reset to first page when applying filter
-            fetchTransactions();
-            showNotification('Filter applied', 'success');
-        });
-        
-        document.getElementById('clearFilterBtn').addEventListener('click', () => {
-            document.getElementById('fromDate').value = '';
-            document.getElementById('toDate').value = '';
-            currentPage = 1; // Reset to first page
-            fetchTransactions();
-            showNotification('Filter cleared', 'info');
+        // Close modal when clicking outside
+        document.getElementById('analyzeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'analyzeModal') {
+                closeAnalyzeModal();
+            }
         });
 
         // Initialize

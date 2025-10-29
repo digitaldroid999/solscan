@@ -89,6 +89,7 @@ async function subscribeCommand(client: Client, args: SubscribeRequest) {
       }
 
       const result = await handleStream(client, args, lastSlot);
+      console.log("Result:", result);
       lastSlot = result.lastSlot;
       if (result.hasRcvdMSg) retryCount = 0;
     } catch (err: any) {

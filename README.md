@@ -19,12 +19,18 @@ Create a `.env` file:
 GRPC_URL=your_grpc_url_here
 X_TOKEN=your_token_here
 
+# Shyft API (for wallet analysis)
+SHYFT_API_KEY=your_shyft_api_key_here
+
 # PostgreSQL
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=solscan
 DB_USER=postgres
 DB_PASSWORD=your_password_here
+
+# Solana RPC (optional, defaults to mainnet)
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 ```
 
 ### 3. Setup Database

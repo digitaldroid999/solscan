@@ -4,6 +4,7 @@ import { SubscribeRequest } from "@triton-one/yellowstone-grpc/dist/types/grpc/g
 import * as bs58 from "bs58";
 import { parseTransaction } from "../parsers/parseFilter";
 import { dbService } from "../database";
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 const MAX_RETRY_WITH_LAST_SLOT = 30;
 const RETRY_DELAY_MS = 1000;
@@ -19,6 +20,7 @@ class TransactionTracker {
   private shouldStop: boolean = false;
   private addresses: string[] = [];
   private currentStream: any = null;
+  private solanaConnection: Connection | null = null;
 
   constructor() {
     // Initialize with empty addresses
@@ -38,6 +40,10 @@ class TransactionTracker {
       "grpc.keepalive_timeout_ms": 1000,
       "grpc.default_compression_algorithm": 2,
     });
+
+    // Initialize Solana RPC connection for wallet analysis
+    const rpcUrl = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+    this.solanaConnection = new Connection(rpcUrl, "confirmed");
 
     console.log("✅ Tracker initialized");
   }
@@ -166,6 +172,7 @@ class TransactionTracker {
           break;
         }
 
+        console.log(err)
         console.error(
           `Stream error, retrying in ${RETRY_DELAY_MS / 1000} second...`
         );
@@ -273,6 +280,88 @@ class TransactionTracker {
     
     this.isRunning = false;
     return { success: true, message: "Tracker stopped successfully" };
+  }
+
+  /**
+   * Analyze wallet - get SOL balance and token holdings using Shyft API
+   */
+  async analyzeWallet(walletAddress: string): Promise<any> {
+    try {
+      const shyftApiKey = process.env.SHYFT_API_KEY;
+      
+      if (!shyftApiKey) {
+        throw new Error("SHYFT_API_KEY not found in environment variables");
+      }
+
+      // Fetch all tokens using Shyft API
+      const headers = new Headers();
+      headers.append("x-api-key", shyftApiKey);
+
+      const requestOptions: RequestInit = {
+        method: 'GET',
+        headers: headers,
+        redirect: 'follow'
+      };
+
+      const response = await fetch(
+        `https://api.shyft.to/sol/v1/wallet/all_tokens?network=mainnet-beta&wallet=${walletAddress}`,
+        requestOptions
+      );
+
+      if (!response.ok) {
+        throw new Error(`Shyft API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || "Failed to fetch wallet data");
+      }
+
+      // Separate SOL and other tokens
+      let solBalance = 0;
+      const tokens: any[] = [];
+
+      if (data.result && Array.isArray(data.result)) {
+        for (const token of data.result) {
+          // Check if it's wrapped SOL (native SOL in token form)
+          if (token.address === "So11111111111111111111111111111111111111112") {
+            solBalance = token.balance;
+          }
+          
+          // Add all tokens (including wrapped SOL) to the list
+          if (token.balance > 0) {
+            tokens.push({
+              mint: token.address,
+              amount: token.balance.toString(),
+              decimals: token.info?.decimals || 0,
+              name: token.info?.name || "Unknown Token",
+              symbol: token.info?.symbol || "???",
+              image: token.info?.image || null,
+            });
+          }
+        }
+      }
+
+      // Also get native SOL balance
+      if (this.solanaConnection) {
+        const publicKey = new PublicKey(walletAddress);
+        const nativeBalance = await this.solanaConnection.getBalance(publicKey);
+        const nativeSol = nativeBalance / LAMPORTS_PER_SOL;
+        
+        // Add native SOL to total if we have it
+        solBalance = nativeSol;
+      }
+
+      return {
+        wallet: walletAddress,
+        solBalance: solBalance.toString(),
+        tokens,
+      };
+    } catch (error: any) {
+      console.error("Error analyzing wallet:", error);
+      throw new Error(`Failed to analyze wallet: ${error.message}`);
+    }
   }
 }
 

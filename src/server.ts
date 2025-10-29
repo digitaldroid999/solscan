@@ -144,6 +144,19 @@ app.get("/api/transactions", async (req, res) => {
 });
 
 /**
+ * GET /api/analyze/:wallet - Analyze wallet information
+ */
+app.get("/api/analyze/:wallet", async (req, res) => {
+  try {
+    const { wallet } = req.params;
+    const walletInfo = await tracker.analyzeWallet(wallet);
+    res.json(walletInfo);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * GET / - Serve the main HTML page
  */
 app.get("/", (req, res) => {
