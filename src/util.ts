@@ -43,7 +43,6 @@ export const detectSwapPlatform = ( tx : any ) => {
             programId: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
         }
     ];
-    
     // Get account keys from the transaction message
     const accountKeys = tx.message?.accountKeys || [];
     const instructions = tx.message?.instructions || [];
@@ -53,6 +52,7 @@ export const detectSwapPlatform = ( tx : any ) => {
     const accountKeysBase58 = accountKeys.map((key: Buffer | Uint8Array) => {
         return bs58.encode(key);
     });
+    console.log(accountKeysBase58)
     
     // Use both instructions and compiledInstructions
     const allInstructions = [...instructions, ...compiledInstructions];

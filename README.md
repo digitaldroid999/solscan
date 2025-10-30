@@ -19,8 +19,11 @@ Create a `.env` file:
 GRPC_URL=your_grpc_url_here
 X_TOKEN=your_token_here
 
-# Shyft API (for wallet analysis)
+# Shyft API (for wallet analysis and transaction parsing)
 SHYFT_API_KEY=your_shyft_api_key_here
+
+# Helius API (for token creator info)
+HELIUS_API_KEY=your_helius_api_key_here
 
 # PostgreSQL
 DB_HOST=localhost
@@ -70,6 +73,9 @@ Open your browser: **http://localhost:3000**
 - ✅ **Auto-refresh** - Updates every 3 seconds
 - ✅ **Pagination** - Browse through transaction history
 - ✅ **Start/Stop Controls** - Full control over tracking
+- ✅ **Wallet Analysis** - Analyze any wallet's SOL balance and token holdings
+- ✅ **Token Creator Info** - Fetch and cache token creator and first buy (dev buy) amount
+- ✅ **Smart Caching** - Only fetch uncached tokens to save API quota
 
 ## 🎯 Supported Platforms
 

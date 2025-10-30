@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import path from "path";
 import { dbService } from "./database";
 import { tracker } from "./tracker";
+import { tokenService } from "./services/tokenService";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 async function initializeApp() {
   try {
     await dbService.initialize();
+    await dbService.initializeDefaultSkipTokens();
     tracker.initialize();
     console.log("✅ Application initialized successfully");
   } catch (error) {
@@ -151,6 +153,148 @@ app.get("/api/analyze/:wallet", async (req, res) => {
     const { wallet } = req.params;
     const walletInfo = await tracker.analyzeWallet(wallet);
     res.json(walletInfo);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/tokens/fetch-info - Fetch and cache token mint info
+ * Request body: { mints: string[] }
+ */
+app.post("/api/tokens/fetch-info", async (req, res) => {
+  try {
+    const { mints } = req.body;
+    
+    if (!Array.isArray(mints) || mints.length === 0) {
+      return res.status(400).json({ error: "Mints array is required" });
+    }
+
+    console.log(`🔍 Fetching info for ${mints.length} tokens...`);
+
+    // Check which tokens are already cached
+    const cachedTokens = await dbService.getTokensByMints(mints);
+    const cachedMints = new Set(cachedTokens.map(t => t.mint_address));
+    
+    // Find tokens that need to be fetched
+    const uncachedMints = mints.filter(mint => !cachedMints.has(mint));
+    
+    console.log(`✅ ${cachedTokens.length} tokens already cached`);
+    console.log(`🔄 Fetching ${uncachedMints.length} new tokens sequentially...`);
+
+    // Fetch creator info for uncached tokens sequentially (one at a time)
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (let i = 0; i < uncachedMints.length; i++) {
+      const mint = uncachedMints[i];
+      console.log(`  [${i + 1}/${uncachedMints.length}] Fetching ${mint}...`);
+      
+      try {
+        const tokenInfo = await tokenService.getTokenCreatorInfo(mint);
+        if (tokenInfo) {
+          await dbService.saveToken({
+            mint_address: mint,
+            creator: tokenInfo.creator,
+            dev_buy_amount: tokenInfo.devBuyAmount,
+            dev_buy_amount_decimal: tokenInfo.devBuyAmountDecimal,
+            dev_buy_used_token: tokenInfo.devBuyUsedToken,
+            dev_buy_token_amount: tokenInfo.devBuyTokenAmount,
+            dev_buy_token_amount_decimal: tokenInfo.devBuyTokenAmountDecimal,
+          });
+          successCount++;
+          console.log(`  ✅ Success: ${mint}`);
+        } else {
+          failCount++;
+          console.log(`  ❌ No info found: ${mint}`);
+        }
+      } catch (error) {
+        failCount++;
+        console.error(`  ❌ Error fetching ${mint}:`, error);
+      }
+    }
+
+    // Get all token data including newly fetched ones
+    const allTokens = await dbService.getTokensByMints(mints);
+
+    res.json({
+      success: true,
+      message: `Fetched ${successCount} tokens, ${failCount} failed, ${cachedTokens.length} cached`,
+      tokens: allTokens,
+      stats: {
+        total: mints.length,
+        cached: cachedTokens.length,
+        fetched: successCount,
+        failed: failCount,
+      }
+    });
+  } catch (error: any) {
+    console.error('Error fetching token info:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/skip-tokens - Get all skip tokens
+ */
+app.get("/api/skip-tokens", async (req, res) => {
+  try {
+    const skipTokens = await dbService.getSkipTokens();
+    res.json({ 
+      success: true,
+      skipTokens 
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/skip-tokens - Add a token to skip list
+ * Request body: { mint_address: string, symbol?: string, description?: string }
+ */
+app.post("/api/skip-tokens", async (req, res) => {
+  try {
+    const { mint_address, symbol, description } = req.body;
+    
+    if (!mint_address || mint_address.trim().length === 0) {
+      return res.status(400).json({ error: "mint_address is required" });
+    }
+    
+    await dbService.addSkipToken({
+      mint_address: mint_address.trim(),
+      symbol: symbol?.trim(),
+      description: description?.trim()
+    });
+    
+    // Refresh the token service cache
+    await tokenService.refreshSkipTokensCache();
+    
+    res.json({ 
+      success: true,
+      message: "Skip token added successfully"
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/skip-tokens/:mintAddress - Remove a token from skip list
+ */
+app.delete("/api/skip-tokens/:mintAddress", async (req, res) => {
+  try {
+    const { mintAddress } = req.params;
+    
+    await dbService.removeSkipToken(mintAddress);
+    
+    // Refresh the token service cache
+    await tokenService.refreshSkipTokensCache();
+    
+    res.json({ 
+      success: true,
+      message: "Skip token removed successfully"
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

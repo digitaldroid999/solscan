@@ -8,6 +8,7 @@
     "server": "npx ts-node src/server.ts",
     "start-cli": "npx ts-node src/index.ts",
     "web": "node start-web.js",
+    "parse-tx": "npx ts-node src/parseTransactionBySignature.ts",
     "build": "npx tsc"
   },
   "author": "",

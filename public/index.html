@@ -455,8 +455,8 @@
         .modal {
             background: white;
             border-radius: 12px;
-            max-width: 900px;
-            width: 90%;
+            max-width: 80%;
+            width: 80%;
             max-height: 80vh;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.3s ease;
@@ -842,6 +842,26 @@
                 <button id="analyzeBtn" class="btn-analyze">
                     <span>📊</span> Analyze
                 </button>
+            </div>
+        </div>
+
+        <!-- Skip Tokens Configuration -->
+        <div class="card">
+            <div class="section-title">🚫 Skip Tokens (Dev Buy Analysis)</div>
+            <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 15px;">
+                Tokens in this list will be skipped when analyzing dev buy amounts. Add common tokens like SOL, USDC, USDT, etc.
+            </p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="skipTokenMint" placeholder="Token mint address..." style="flex: 1; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.85rem;">
+                <input type="text" id="skipTokenSymbol" placeholder="Symbol (optional)" style="width: 120px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.85rem;">
+                <button onclick="addSkipToken()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;">
+                    ➕ Add
+                </button>
+            </div>
+
+            <div id="skipTokensList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <!-- Skip tokens will be loaded here -->
             </div>
         </div>
 
@@ -1311,12 +1331,46 @@
         function displayWalletInfo(data) {
             const container = document.getElementById('walletInfoContainer');
             
+            // Store data globally for fetchTokenInfo function
+            window.currentWalletData = data;
+            
             let tokensHTML = '';
             if (data.tokens && data.tokens.length > 0) {
+                const hasTokenInfo = data.tokenInfo && Object.keys(data.tokenInfo).length > 0;
+                
                 const tokenRows = data.tokens.map((token, index) => {
+                    const tokenInfo = data.tokenInfo && data.tokenInfo[token.mint];
+                    const hasInfo = tokenInfo && (tokenInfo.creator || tokenInfo.dev_buy_amount);
+                    
                     const tokenImage = token.image 
                         ? `<img src="${token.image}" alt="${token.symbol}" class="token-image" onerror="this.style.display='none'">`
                         : `<div class="token-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.7rem;">${(token.symbol || '?').substring(0, 2)}</div>`;
+                    
+                    const creatorCell = hasInfo && tokenInfo.creator
+                        ? `<td class="token-creator-cell" title="${tokenInfo.creator}">
+                            <a href="https://solscan.io/account/${tokenInfo.creator}" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none; font-family: 'Courier New', monospace; font-size: 0.75rem;">
+                                ${tokenInfo.creator.substring(0, 8)}...
+                            </a>
+                        </td>`
+                        : `<td class="token-creator-cell" style="color: #9ca3af; font-style: italic;">-</td>`;
+                    
+                    // Calculate human-readable amounts from raw amounts and decimals
+                    let devBuyCell;
+                    if (hasInfo && tokenInfo.dev_buy_amount && tokenInfo.dev_buy_amount_decimal !== null && tokenInfo.dev_buy_amount_decimal !== undefined) {
+                        const amountSpent = parseFloat(tokenInfo.dev_buy_amount) / Math.pow(10, tokenInfo.dev_buy_amount_decimal);
+                        const tokensReceived = tokenInfo.dev_buy_token_amount && tokenInfo.dev_buy_token_amount_decimal !== null && tokenInfo.dev_buy_token_amount_decimal !== undefined
+                            ? parseFloat(tokenInfo.dev_buy_token_amount) / Math.pow(10, tokenInfo.dev_buy_token_amount_decimal)
+                            : null;
+                        
+                        devBuyCell = `<td class="token-devbuy-cell" style="text-align: right; font-weight: 600; color: #10b981;">
+                            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                                <span title="Amount spent">${amountSpent.toFixed(4)}</span>
+                                ${tokensReceived ? `<span style="font-size: 0.7rem; color: #6b7280; margin-top: 2px;" title="Tokens received">(${tokensReceived.toFixed(2)} tokens)</span>` : ''}
+                            </div>
+                        </td>`;
+                    } else {
+                        devBuyCell = `<td class="token-devbuy-cell" style="color: #9ca3af; font-style: italic; text-align: right;">-</td>`;
+                    }
                     
                     return `
                         <tr>
@@ -1332,11 +1386,40 @@
                                 </a>
                             </td>
                             <td class="token-amount-cell">${formatNumber(token.amount)}</td>
+                            ${creatorCell}
+                            ${devBuyCell}
                         </tr>
                     `;
                 }).join('');
                 
+                const fetchButton = !hasTokenInfo 
+                    ? `<button 
+                        onclick="fetchTokensInfo()" 
+                        id="fetchTokenInfoBtn"
+                        style="
+                            margin-bottom: 15px; 
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                            color: white; 
+                            border: none; 
+                            padding: 10px 20px; 
+                            border-radius: 8px; 
+                            cursor: pointer; 
+                            font-weight: 600;
+                            font-size: 0.9rem;
+                            transition: all 0.3s;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        "
+                        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';"
+                        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
+                    >
+                        <span>🔍</span> Fetch Token Creator Info
+                    </button>` 
+                    : '';
+                
                 tokensHTML = `
+                    ${fetchButton}
                     <table class="token-table">
                         <thead>
                             <tr>
@@ -1345,6 +1428,8 @@
                                 <th>Symbol</th>
                                 <th>Mint Address</th>
                                 <th style="text-align: right;">Amount</th>
+                                <th>Creator</th>
+                                <th style="text-align: right;">Dev Buy</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1382,6 +1467,60 @@
             `;
         }
 
+        async function fetchTokensInfo() {
+            const btn = document.getElementById('fetchTokenInfoBtn');
+            if (!btn) return;
+
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Fetching...';
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.6';
+
+            try {
+                const mints = window.currentWalletData.tokens.map(t => t.mint);
+                
+                const response = await fetch('/api/tokens/fetch-info', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mints })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification(`✅ ${result.message}`, 'success');
+                    
+                    // Convert tokens array to object for easy lookup
+                    const tokenInfoMap = {};
+                    result.tokens.forEach(token => {
+                        tokenInfoMap[token.mint_address] = token;
+                    });
+                    
+                    // Update wallet data with token info
+                    window.currentWalletData.tokenInfo = tokenInfoMap;
+                    
+                    // Refresh the display
+                    displayWalletInfo(window.currentWalletData);
+                } else {
+                    showNotification('❌ Failed to fetch token info', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>🔍</span> Fetch Token Creator Info';
+                    btn.style.cursor = 'pointer';
+                    btn.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error('Error fetching token info:', error);
+                showNotification('❌ Error fetching token info', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span>🔍</span> Fetch Token Creator Info';
+                btn.style.cursor = 'pointer';
+                btn.style.opacity = '1';
+            }
+        }
+
         // Analyze button - Open modal
         document.getElementById('analyzeBtn').addEventListener('click', openAnalyzeModal);
         
@@ -1392,9 +1531,111 @@
             }
         });
 
+        // Skip Tokens Management
+        async function fetchSkipTokens() {
+            try {
+                const response = await fetch('/api/skip-tokens');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displaySkipTokens(data.skipTokens);
+                }
+            } catch (error) {
+                console.error('Failed to fetch skip tokens:', error);
+            }
+        }
+
+        function displaySkipTokens(skipTokens) {
+            const container = document.getElementById('skipTokensList');
+            
+            if (!skipTokens || skipTokens.length === 0) {
+                container.innerHTML = '<p style="color: #9ca3af; font-style: italic; font-size: 0.85rem;">No skip tokens configured</p>';
+                return;
+            }
+            
+            container.innerHTML = skipTokens.map(token => `
+                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f3f4f6; border-radius: 6px; font-size: 0.85rem;">
+                    <span style="font-weight: 600; color: #1f2937;">${token.symbol || 'Token'}</span>
+                    <span style="color: #6b7280; font-family: 'Courier New', monospace; font-size: 0.75rem;" title="${token.mint_address}">
+                        ${token.mint_address.substring(0, 8)}...
+                    </span>
+                    ${token.description ? `<span style="color: #9ca3af; font-size: 0.75rem;">| ${token.description}</span>` : ''}
+                    <button onclick="removeSkipToken('${token.mint_address}')" 
+                            style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; font-size: 1rem; line-height: 1;"
+                            title="Remove">
+                        ×
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function addSkipToken() {
+            const mintInput = document.getElementById('skipTokenMint');
+            const symbolInput = document.getElementById('skipTokenSymbol');
+            
+            const mint = mintInput.value.trim();
+            const symbol = symbolInput.value.trim();
+            
+            if (!mint) {
+                showNotification('⚠️ Please enter a token mint address', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/skip-tokens', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mint_address: mint,
+                        symbol: symbol || null,
+                        description: null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Skip token added successfully', 'success');
+                    mintInput.value = '';
+                    symbolInput.value = '';
+                    fetchSkipTokens();
+                } else {
+                    showNotification('❌ ' + (data.error || 'Failed to add skip token'), 'error');
+                }
+            } catch (error) {
+                console.error('Failed to add skip token:', error);
+                showNotification('❌ Error adding skip token', 'error');
+            }
+        }
+
+        async function removeSkipToken(mintAddress) {
+            if (!confirm('Remove this token from skip list?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/skip-tokens/${encodeURIComponent(mintAddress)}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Skip token removed successfully', 'success');
+                    fetchSkipTokens();
+                } else {
+                    showNotification('❌ ' + (data.error || 'Failed to remove skip token'), 'error');
+                }
+            } catch (error) {
+                console.error('Failed to remove skip token:', error);
+                showNotification('❌ Error removing skip token', 'error');
+            }
+        }
+
         // Initialize
         fetchStatus();
         fetchTransactions();
+        fetchSkipTokens();
 
         // Check status periodically
         setInterval(fetchStatus, 5000);
