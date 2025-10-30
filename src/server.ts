@@ -152,7 +152,26 @@ app.get("/api/analyze/:wallet", async (req, res) => {
   try {
     const { wallet } = req.params;
     const walletInfo = await tracker.analyzeWallet(wallet);
-    res.json(walletInfo);
+    
+    // Get token mints from wallet info
+    const tokenMints = walletInfo.tokens?.map((t: any) => t.mint) || [];
+    
+    // Fetch token information from database
+    let tokenInfo: Record<string, any> = {};
+    if (tokenMints.length > 0) {
+      const tokensFromDb = await dbService.getTokensByMints(tokenMints);
+      // Convert array to object for easier lookup
+      tokenInfo = tokensFromDb.reduce((acc, token) => {
+        acc[token.mint_address] = token;
+        return acc;
+      }, {} as Record<string, any>);
+    }
+    
+    // Add token info to response
+    res.json({
+      ...walletInfo,
+      tokenInfo
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

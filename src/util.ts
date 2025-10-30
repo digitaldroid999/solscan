@@ -52,7 +52,6 @@ export const detectSwapPlatform = ( tx : any ) => {
     const accountKeysBase58 = accountKeys.map((key: Buffer | Uint8Array) => {
         return bs58.encode(key);
     });
-    console.log(accountKeysBase58)
     
     // Use both instructions and compiledInstructions
     const allInstructions = [...instructions, ...compiledInstructions];

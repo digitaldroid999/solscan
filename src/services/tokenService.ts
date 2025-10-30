@@ -3,6 +3,9 @@
  * Handles fetching token creator and first buy amount using Helius and Shyft APIs
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+
 interface HeliusTransaction {
   slot: number;
   transaction: {
@@ -10,6 +13,15 @@ interface HeliusTransaction {
     message: any;
   };
   meta: any;
+}
+
+interface HeliusSignatureResponse {
+  signature: string;
+  slot: number;
+  err: any;
+  memo: string | null;
+  blockTime: number;
+  confirmationStatus: string;
 }
 
 interface SolscanSwapData {
@@ -100,10 +112,6 @@ export class TokenService {
       this.skipTokensCache = new Set(skipTokens.map(t => t.mint_address));
       this.lastSkipTokensUpdate = Date.now();
       this.cacheInitialized = true;
-      console.log(`🔄 Skip tokens cache updated: ${this.skipTokensCache.size} tokens`);
-      if (this.skipTokensCache.size > 0) {
-        console.log(`   Skip tokens: ${Array.from(this.skipTokensCache).map(t => t.substring(0, 8)).join(', ')}...`);
-      }
     } catch (error) {
       console.error('Failed to refresh skip tokens cache:', error);
       this.cacheInitialized = true; // Mark as initialized even on error to prevent infinite loops
@@ -119,7 +127,7 @@ export class TokenService {
       await this.refreshSkipTokensCache();
       return;
     }
-    
+
     // Refresh if cache is stale
     const now = Date.now();
     if (now - this.lastSkipTokensUpdate > this.CACHE_TTL) {
@@ -140,42 +148,68 @@ export class TokenService {
   }
 
   /**
-   * Get the first 10 transactions for a token mint using Helius API
+   * Get the first transactions (signatures only) for a token mint using Helius API
+   * Retries once after 15 seconds if empty data is returned (newly minted tokens)
    */
-  async getFirstTransactions(mintAddress: string): Promise<HeliusTransaction[]> {
+  async getFirstTransactions(mintAddress: string, isRetry: boolean = false): Promise<string[]> {
     try {
-      const response = await fetch(this.heliusUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 'find-first-mints',
-          method: 'getTransactionsForAddress',
-          params: [
-            mintAddress,
-            {
-              encoding: 'jsonParsed',
-              maxSupportedTransactionVersion: 0,
-              sortOrder: 'asc', // Chronological order from the beginning
-              limit: 20,
-              transactionDetails: 'full',
-            },
-          ],
-        }),
+      const url = `https://mainnet.helius-rpc.com/?api-key=${this.heliusApiKey}`;
+      console.log(`🔗 Helius URL: ${url}`);
+
+      const response = await axios.post(url, {
+        jsonrpc: "2.0",
+        id: "find-first-mints",
+        method: "getTransactionsForAddress",
+        params: [
+          mintAddress,
+          {
+            encoding: "jsonParsed",
+            maxSupportedTransactionVersion: 0,
+            sortOrder: "asc",
+            limit: 20,
+            transactionDetails: "signatures",
+            filters: {
+              status: "succeeded"
+            }
+          },
+        ],
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        }
       });
 
-      const data = await response.json();
-      
+      const data = response.data;
+
       if (data.error) {
         console.error('Helius API error:', data.error);
         return [];
       }
+      console.log('Helius response:', data);
 
-      return data.result?.data || [];
-    } catch (error) {
-      console.error('Failed to fetch first transactions from Helius:', error);
+      // Extract signatures from the response
+      const signatures: string[] = data.result?.data?.map((item: HeliusSignatureResponse) => item.signature) || [];
+      console.log(`✅ Extracted ${signatures.length} signatures`);
+
+      // If empty and not a retry, wait and retry once (newly minted token)
+      if (signatures.length === 0 && !isRetry) {
+        console.log(`⏰ Empty response - token likely newly minted. Waiting 15 seconds before retry...`);
+        await this.sleep(10000); // Wait 10 seconds
+        return this.getFirstTransactions(mintAddress, true); // Retry
+      }
+
+      return signatures;
+    } catch (error: any) {
+      console.error('Failed to fetch first transactions from Helius:', error.message || error);
       return [];
     }
+  }
+
+  /**
+   * Sleep helper function
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -184,11 +218,11 @@ export class TokenService {
   async parseTransactions(signatures: string[]): Promise<SolscanTransactionResult | null> {
     try {
       const url = 'https://pro-api.solscan.io/v2.0/transaction/actions/multi';
-      
+
       // Build query string with array parameters
       const params = new URLSearchParams();
       signatures.forEach(sig => params.append('tx', sig));
-      
+
       const response = await fetch(`${url}?${params.toString()}`, {
         method: 'GET',
         headers: {
@@ -197,7 +231,7 @@ export class TokenService {
       });
 
       const data = await response.json();
-      
+
       if (!data.success || !data.data || data.data.length === 0) {
         console.error('Solscan API error for signatures');
         return null;
@@ -214,7 +248,7 @@ export class TokenService {
    * Parse all transactions at once and find first swap
    */
   async parseTransactionsUntilSwap(
-    signatures: string[], 
+    signatures: string[],
     mintAddress: string
   ): Promise<SolscanTransactionResult | null> {
     if (signatures.length === 0) {
@@ -225,7 +259,7 @@ export class TokenService {
 
     // Parse all transactions at once
     const parsed = await this.parseTransactions(signatures);
-    
+
     if (!parsed || !parsed.data || parsed.data.length === 0) {
       console.log(`    ⚠️  Failed to parse transactions`);
       return null;
@@ -236,21 +270,21 @@ export class TokenService {
     // Find the first transaction with a swap
     for (let i = 0; i < parsed.data.length; i++) {
       const txData = parsed.data[i];
-      
+
       // Check both title and body for swap activities
       const hasSwap = txData.summaries?.some(
         (summary: any) => {
           // Check title
           const titleHasSwap = summary.title?.activity_type === 'ACTIVITY_TOKEN_SWAP' &&
-                               (summary.title?.data?.token_1 === mintAddress || 
-                                summary.title?.data?.token_2 === mintAddress);
-          
+            (summary.title?.data?.token_1 === mintAddress ||
+              summary.title?.data?.token_2 === mintAddress);
+
           // Check body array
-          const bodyHasSwap = summary.body?.some((bodyItem: any) => 
+          const bodyHasSwap = summary.body?.some((bodyItem: any) =>
             bodyItem.activity_type === 'ACTIVITY_TOKEN_SWAP' &&
             (bodyItem.data?.token_1 === mintAddress || bodyItem.data?.token_2 === mintAddress)
           );
-          
+
           return titleHasSwap || bodyHasSwap;
         }
       );
@@ -285,14 +319,14 @@ export class TokenService {
 
     // Collect all swap activities from both title and body
     const allSwapActivities: any[] = [];
-    
+
     if (txData.summaries) {
       for (const summary of txData.summaries) {
         // Check title for swaps
         if (summary.title?.activity_type === 'ACTIVITY_TOKEN_SWAP') {
           allSwapActivities.push(summary.title);
         }
-        
+
         // Check body array for swaps
         if (summary.body && Array.isArray(summary.body)) {
           for (const bodyItem of summary.body) {
@@ -311,9 +345,9 @@ export class TokenService {
     // Process each swap activity
     for (const swapData of allSwapActivities) {
       if (!swapData.data) continue;
-      
+
       const data = swapData.data;
-      
+
       // Determine which token is which (token_1 or token_2 is the mint we're looking for)
       let tokenIn: string;
       let tokenOut: string;
@@ -348,15 +382,15 @@ export class TokenService {
 
       // Calculate the human-readable amount for logging
       const humanAmountIn = amountIn / Math.pow(10, decimalIn);
-      const humanAmountOut = data.amount_2 === amountIn ? 
-                             data.amount_1 / Math.pow(10, decimalOut) : 
-                             data.amount_2 / Math.pow(10, decimalOut);
+      const humanAmountOut = data.amount_2 === amountIn ?
+        data.amount_1 / Math.pow(10, decimalOut) :
+        data.amount_2 / Math.pow(10, decimalOut);
 
       // First buy found!
       console.log(`  🎉 Creator: ${swapper}`);
       console.log(`  💰 Dev Buy: ${humanAmountIn} for ${humanAmountOut} tokens`);
       console.log(`  📊 Raw amounts: ${amountInStr} (decimal: ${decimalIn}) -> ${data.amount_2 === amountIn ? data.amount_1_str : data.amount_2_str} (decimal: ${decimalOut})`);
-      
+
       return {
         creator: swapper,
         devBuyAmount: amountInStr,
@@ -382,37 +416,27 @@ export class TokenService {
       return null;
     }
 
-    // Step 1: Get first 10 transactions
-    const transactions = await this.getFirstTransactions(mintAddress);
-    
-    if (transactions.length === 0) {
+    // Step 1: Get first transaction signatures
+    const signatures = await this.getFirstTransactions(mintAddress);
+
+    if (signatures.length === 0) {
       console.log('  ❌ No transactions found for this token');
       return null;
     }
 
-    console.log(`  ✅ Found ${transactions.length} transactions`);
+    console.log(`  ✅ Found ${signatures.length} transaction signatures`);
 
-    // Step 2: Extract signatures
-    const signatures = transactions
-      .map((tx) => tx.transaction.signatures[0])
-      .filter((sig) => sig);
-
-    if (signatures.length === 0) {
-      console.log('  ❌ No valid signatures found');
-      return null;
-    }
-
-    // Step 3: Parse transactions one by one until we find a swap
+    // Step 2: Parse transactions one by one until we find a swap
     const parsedTransaction = await this.parseTransactionsUntilSwap(signatures, mintAddress);
-    
+
     if (!parsedTransaction) {
       console.log('  ❌ No swap transaction found');
       return null;
     }
 
-    // Step 4: Extract first buy info from the found swap transaction
+    // Step 3: Extract first buy info from the found swap transaction
     const creatorInfo = await this.extractFirstBuy(parsedTransaction, mintAddress);
-    
+
     if (creatorInfo) {
       return creatorInfo;
     }

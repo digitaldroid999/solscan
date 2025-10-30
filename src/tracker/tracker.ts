@@ -5,9 +5,7 @@ import * as bs58 from "bs58";
 import { parseTransaction } from "../parsers/parseFilter";
 import { dbService } from "../database";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-
-const MAX_RETRY_WITH_LAST_SLOT = 30;
-const RETRY_DELAY_MS = 1000;
+import { tokenQueueService } from "../services/tokenQueueService";
 
 type StreamResult = {
   lastSlot?: string;
@@ -113,7 +111,6 @@ class TransactionTracker {
 
           // Parse transaction based on detected platform
           const result = parseTransaction(data.transaction);
-          console.log("Parsed transaction:", result);
 
           // Save to database asynchronously (non-blocking)
           if (result) {
@@ -126,6 +123,17 @@ class TransactionTracker {
               out_amount: result.out_amount,
               feePayer: result.feePayer,
             });
+
+            // Extract token from buy/sell events and add to queue
+            const txType = result.type?.toUpperCase();
+            console.log(`📝 Transaction type: ${result.type} (normalized: ${txType})`);
+            
+            if (txType === 'BUY' || txType === 'SELL') {
+              console.log(`✅ Extracting token for ${result.type} transaction...`);
+              this.extractAndQueueToken(result);
+            } else {
+              console.log(`⏭️ Skipping token extraction - type is ${result.type}`);
+            }
           }
         }
       });
@@ -146,11 +154,10 @@ class TransactionTracker {
   }
 
   /**
-   * Subscribe and handle retries
+   * Subscribe to the stream
    */
   private async subscribeCommand(args: SubscribeRequest) {
     let lastSlot: string | undefined;
-    let retryCount = 0;
 
     while (this.isRunning && !this.shouldStop) {
       try {
@@ -160,7 +167,6 @@ class TransactionTracker {
 
         const result = await this.handleStream(args, lastSlot);
         lastSlot = result.lastSlot;
-        if (result.hasRcvdMSg) retryCount = 0;
 
         // If we finished normally and should stop, break the loop
         if (this.shouldStop) {
@@ -173,32 +179,71 @@ class TransactionTracker {
         }
 
         console.log(err)
-        console.error(
-          `Stream error, retrying in ${RETRY_DELAY_MS / 1000} second...`
-        );
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        console.error("Stream error occurred");
 
         lastSlot = err.lastSlot;
-        if (err.hasRcvdMSg) retryCount = 0;
 
-        if (lastSlot && retryCount < MAX_RETRY_WITH_LAST_SLOT) {
-          console.log(
-            `#${retryCount} retrying with last slot ${lastSlot}, remaining retries ${
-              MAX_RETRY_WITH_LAST_SLOT - retryCount
-            }`
-          );
+        if (lastSlot) {
+          console.log(`Reconnecting with last slot ${lastSlot}`);
           args.fromSlot = lastSlot;
-          retryCount++;
         } else {
-          console.log("Retrying from latest slot (no last slot available)");
+          console.log("Reconnecting from latest slot");
           delete args.fromSlot;
-          retryCount = 0;
           lastSlot = undefined;
         }
       }
     }
 
     console.log("🛑 Tracker stopped");
+  }
+
+  /**
+   * Extract token from buy/sell event and add to queue
+   * Extracts the non-SOL token from the transaction
+   */
+  private extractAndQueueToken(result: any): void {
+    // SOL wrapped token address
+    const SOL_MINT = 'So11111111111111111111111111111111111111112';
+    
+    let tokenMint: string | null = null;
+    const txType = result.type?.toUpperCase();
+
+    console.log(`🔎 Extracting token from transaction:`);
+    console.log(`   Type: ${result.type} (normalized: ${txType})`);
+    console.log(`   mintFrom: ${result.mintFrom}`);
+    console.log(`   mintTo: ${result.mintTo}`);
+
+    // For BUY transactions: mintTo is the token we're buying (not SOL)
+    // For SELL transactions: mintFrom is the token we're selling (not SOL)
+    if (txType === 'BUY') {
+      // We're buying tokenMint with SOL
+      if (result.mintTo && result.mintTo !== SOL_MINT) {
+        tokenMint = result.mintTo;
+        console.log(`   ✅ BUY detected - Token to buy: ${tokenMint.substring(0, 8)}...`);
+      } else {
+        console.log(`   ⚠️ BUY detected but mintTo is SOL or missing`);
+      }
+    } else if (txType === 'SELL') {
+      // We're selling tokenMint for SOL
+      if (result.mintFrom && result.mintFrom !== SOL_MINT) {
+        tokenMint = result.mintFrom;
+        console.log(`   ✅ SELL detected - Token to sell: ${tokenMint.substring(0, 8)}...`);
+      } else {
+        console.log(`   ⚠️ SELL detected but mintFrom is SOL or missing`);
+      }
+    }
+
+    // If we found a token, add it to the queue
+    if (tokenMint) {
+      console.log(`🪙 Detected token in ${result.type} transaction: ${tokenMint.substring(0, 8)}...`);
+      
+      // Add to queue (non-blocking)
+      tokenQueueService.addToken(tokenMint).catch(error => {
+        console.error(`Failed to add token to queue: ${error.message}`);
+      });
+    } else {
+      console.log(`❌ No valid token found to add to queue`);
+    }
   }
 
   /**
@@ -219,6 +264,9 @@ class TransactionTracker {
 
     this.isRunning = true;
     this.shouldStop = false;
+
+    // Start token queue processor
+    tokenQueueService.start();
 
     console.log('\n' + '🚀 '.repeat(30));
     console.log('STARTING TRANSACTION TRACKING');
@@ -265,6 +313,9 @@ class TransactionTracker {
     }
 
     this.shouldStop = true;
+    
+    // Stop token queue processor
+    tokenQueueService.stop();
     
     // End current stream if exists
     if (this.currentStream) {
