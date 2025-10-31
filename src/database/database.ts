@@ -112,6 +112,24 @@ class DatabaseService {
         );
 
         CREATE INDEX IF NOT EXISTS idx_skip_mint_address ON skip_tokens(mint_address);
+
+        CREATE TABLE IF NOT EXISTS wallets (
+          id SERIAL PRIMARY KEY,
+          wallet_address VARCHAR(100) NOT NULL,
+          token_address VARCHAR(100) NOT NULL,
+          first_buy_timestamp TIMESTAMP,
+          first_buy_amount VARCHAR(100),
+          first_sell_timestamp TIMESTAMP,
+          first_sell_amount VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(wallet_address, token_address)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_wallet_address ON wallets(wallet_address);
+        CREATE INDEX IF NOT EXISTS idx_token_address ON wallets(token_address);
+        CREATE INDEX IF NOT EXISTS idx_wallet_token ON wallets(wallet_address, token_address);
+        CREATE INDEX IF NOT EXISTS idx_wallets_first_buy ON wallets(first_buy_timestamp);
+        CREATE INDEX IF NOT EXISTS idx_wallets_first_sell ON wallets(first_sell_timestamp);
       `;
 
       await this.pool.query(createTableQuery);
@@ -546,6 +564,139 @@ class DatabaseService {
       } catch (error) {
         // Ignore errors (likely duplicates)
       }
+    }
+  }
+
+  /**
+   * Save or update wallet-token pair with buy/sell tracking
+   */
+  async saveWalletTokenPair(
+    walletAddress: string,
+    tokenAddress: string,
+    transactionType: 'BUY' | 'SELL',
+    amount: string
+  ): Promise<void> {
+    // Use setImmediate to ensure this is truly async and non-blocking
+    setImmediate(async () => {
+      try {
+        if (transactionType === 'BUY') {
+          // Insert or update first buy info (only if first_buy_timestamp is NULL)
+          const query = `
+            INSERT INTO wallets (
+              wallet_address,
+              token_address,
+              first_buy_timestamp,
+              first_buy_amount
+            ) VALUES ($1, $2, CURRENT_TIMESTAMP, $3)
+            ON CONFLICT (wallet_address, token_address) 
+            DO UPDATE SET
+              first_buy_timestamp = COALESCE(wallets.first_buy_timestamp, CURRENT_TIMESTAMP),
+              first_buy_amount = COALESCE(wallets.first_buy_amount, $3)
+          `;
+          await this.pool.query(query, [walletAddress, tokenAddress, amount]);
+          console.log(`💾 Wallet BUY tracked: ${walletAddress.substring(0, 8)}... - ${tokenAddress.substring(0, 8)}... (Amount: ${amount})`);
+        } else if (transactionType === 'SELL') {
+          // Insert or update first sell info (only if first_sell_timestamp is NULL)
+          const query = `
+            INSERT INTO wallets (
+              wallet_address,
+              token_address,
+              first_sell_timestamp,
+              first_sell_amount
+            ) VALUES ($1, $2, CURRENT_TIMESTAMP, $3)
+            ON CONFLICT (wallet_address, token_address) 
+            DO UPDATE SET
+              first_sell_timestamp = COALESCE(wallets.first_sell_timestamp, CURRENT_TIMESTAMP),
+              first_sell_amount = COALESCE(wallets.first_sell_amount, $3)
+          `;
+          await this.pool.query(query, [walletAddress, tokenAddress, amount]);
+          console.log(`💾 Wallet SELL tracked: ${walletAddress.substring(0, 8)}... - ${tokenAddress.substring(0, 8)}... (Amount: ${amount})`);
+        }
+      } catch (error: any) {
+        console.error(`❌ Failed to save wallet-token pair:`, error.message);
+      }
+    });
+  }
+
+  /**
+   * Get wallet-token pairs by wallet address
+   */
+  async getWalletTokens(walletAddress: string): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          wallet_address,
+          token_address,
+          first_buy_timestamp,
+          first_buy_amount,
+          first_sell_timestamp,
+          first_sell_amount,
+          created_at
+        FROM wallets
+        WHERE wallet_address = $1
+        ORDER BY created_at DESC
+      `;
+
+      const result = await this.pool.query(query, [walletAddress]);
+      return result.rows;
+    } catch (error) {
+      console.error('Failed to fetch wallet tokens:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get wallets by token address
+   */
+  async getTokenWallets(tokenAddress: string, limit: number = 50): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          wallet_address,
+          token_address,
+          first_buy_timestamp,
+          first_buy_amount,
+          first_sell_timestamp,
+          first_sell_amount,
+          created_at
+        FROM wallets
+        WHERE token_address = $1
+        ORDER BY created_at DESC
+        LIMIT $2
+      `;
+
+      const result = await this.pool.query(query, [tokenAddress, limit]);
+      return result.rows;
+    } catch (error) {
+      console.error('Failed to fetch token wallets:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get all wallet-token pairs with pagination
+   */
+  async getWalletTokenPairs(limit: number = 50, offset: number = 0): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          wallet_address,
+          token_address,
+          first_buy_timestamp,
+          first_buy_amount,
+          first_sell_timestamp,
+          first_sell_amount,
+          created_at
+        FROM wallets
+        ORDER BY created_at DESC
+        LIMIT $1 OFFSET $2
+      `;
+
+      const result = await this.pool.query(query, [limit, offset]);
+      return result.rows;
+    } catch (error) {
+      console.error('Failed to fetch wallet-token pairs:', error);
+      return [];
     }
   }
 }

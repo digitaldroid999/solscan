@@ -6,6 +6,7 @@ import { parseTransaction } from "../parsers/parseFilter";
 import { dbService } from "../database";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { tokenQueueService } from "../services/tokenQueueService";
+import { walletTrackingService } from "../services/walletTrackingService";
 
 type StreamResult = {
   lastSlot?: string;
@@ -124,15 +125,29 @@ class TransactionTracker {
               feePayer: result.feePayer,
             });
 
-            // Extract token from buy/sell events and add to queue
+            // Extract token from buy/sell events
             const txType = result.type?.toUpperCase();
             console.log(`📝 Transaction type: ${result.type} (normalized: ${txType})`);
             
             if (txType === 'BUY' || txType === 'SELL') {
-              console.log(`✅ Extracting token for ${result.type} transaction...`);
+              console.log(`✅ Processing ${result.type} transaction...`);
+              
+              // 1. Track wallet-token pair (new separate module)
+              walletTrackingService.trackWalletToken(
+                result.feePayer,
+                result.mintFrom,
+                result.mintTo,
+                result.in_amount?.toString() || '0',
+                result.out_amount?.toString() || '0',
+                result.type
+              ).catch(error => {
+                console.error(`Failed to track wallet-token pair: ${error.message}`);
+              });
+
+              // 2. Extract and queue token for info extraction (existing module)
               this.extractAndQueueToken(result);
             } else {
-              console.log(`⏭️ Skipping token extraction - type is ${result.type}`);
+              console.log(`⏭️ Skipping - type is ${result.type}`);
             }
           }
         }
